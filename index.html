@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Study Planner</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Hive background -->
+  <div class="hive-bg"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="logo.png" alt="Logo">
+      <h2>Planner</h2>
+    </div>
+    <nav>
+      <ul>
+        <li onclick="loadSection('home')">🏠 Dashboard</li>
+        <li onclick="loadSection('study')">📘 Study</li>
+        <li onclick="loadSection('focus')">🎯 Focus</li>
+        <li onclick="loadSection('settings')">⚙️ Settings</li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main id="main-content">
+
+    <!-- Dashboard -->
+    <section id="home" class="section active">
+      <h1>Welcome Back 👋</h1>
+      <div class="stats-grid">
+        <div class="card">
+          <h3 id="task-count">0</h3>
+          <p>Total Tasks</p>
+        </div>
+        <div class="card">
+          <h3 id="completed-count">0</h3>
+          <p>Completed</p>
+        </div>
+        <div class="card">
+          <h3 id="progress-percent">0%</h3>
+          <p>Progress</p>
+        </div>
+        <div class="card">
+          <h3 id="study-streak">🔥 0</h3>
+          <p>Day Streak</p>
+        </div>
+      </div>
+
+      <!-- Dashboard Charts -->
+      <div class="dashboard-charts">
+        <div class="chart-card">
+          <h3>Task Completion</h3>
+          <canvas id="taskChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Weekly Focus Hours</h3>
+          <canvas id="weeklyChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <h3>Quick Actions</h3>
+        <button onclick="loadSection('study')"><i class="fas fa-plus"></i> Add Task</button>
+        <button onclick="loadSection('focus')"><i class="fas fa-clock"></i> Start Focus</button>
+        <button onclick="loadSection('study')"><i class="fas fa-book"></i> Review Notes</button>
+      </div>
+    </section>
+
+    <!-- Study -->
+    <section id="study" class="section">
+      <h2>📘 Study Hub</h2>
+
+      <!-- Add Task Form -->
+      <div class="task-input">
+        <input type="text" id="taskInput" placeholder="Enter a task">
+        <input type="date" id="taskDeadline">
+        <select id="taskCategory">
+          <option value="math">Math</option>
+          <option value="science">Science</option>
+          <option value="programming">Programming</option>
+          <option value="language">Language</option>
+        </select>
+        <select id="taskPriority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button onclick="addTask()">Add</button>
+      </div>
+
+      <!-- Task Filters -->
+      <div class="task-filters">
+        <button onclick="filterTasks('all')">All</button>
+        <button onclick="filterTasks('today')">Today</button>
+        <button onclick="filterTasks('high')">High Priority</button>
+        <button onclick="filterTasks('completed')">Completed</button>
+      </div>
+
+      <!-- Task List -->
+      <ul id="taskList" class="task-list"></ul>
+
+      <!-- Progress Ring -->
+      <div class="progress-ring">
+        <svg width="120" height="120">
+          <circle cx="60" cy="60" r="50" stroke="#eee" stroke-width="10" fill="none"></circle>
+          <circle id="progressCircle" cx="60" cy="60" r="50" stroke="#4caf50" stroke-width="10" fill="none" stroke-dasharray="314" stroke-dashoffset="314"></circle>
+        </svg>
+        <p id="progressText">0%</p>
+      </div>
+
+      <!-- Achievement Badges -->
+      <div class="badges">
+        <h3>🏆 Achievements</h3>
+        <div class="badge-grid">
+          <div class="badge" id="badge-first-task">✅ First Task</div>
+          <div class="badge" id="badge-5-tasks">📘 5 Tasks</div>
+          <div class="badge" id="badge-streak">🔥 3 Day Streak</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Focus Hub -->
+    <section id="focus" class="section">
+      <div id="timer-panel">
+        <h2>Focus Timer</h2>
+        <div id="timer-display">25:00</div>
+        <button id="start-timer"><i class="fas fa-play"></i> Start</button>
+        <button id="pause-timer"><i class="fas fa-pause"></i> Pause</button>
+        <button id="reset-timer"><i class="fas fa-undo"></i> Reset</button>
+      </div>
+
+      <div id="template-switcher">
+        <h3>Study Template</h3>
+        <button data-template="workspace.jpg">Workspace</button>
+        <button data-template="library.jpg">Library</button>
+        <button data-template="whiteboard.jpg">Whiteboard</button>
+        <button data-template="coffeeshop.jpg">Coffee Shop</button>
+        <button data-template="nightstudy.jpg">Night</button>
+        <button data-template="nature.jpg">Nature</button>
+        <button data-template="futuristic.jpg">Futuristic</button>
+        <button data-template="bookshelf.jpg">Bookshelf</button>
+        <button data-template="abstract.jpg">Abstract</button>
+      </div>
+
+      <div id="notes-panel">
+        <h3>Session Notes</h3>
+        <textarea id="notes" placeholder="Write your notes here..."></textarea>
+        <button id="save-notes"><i class="fas fa-save"></i> Save Notes</button>
+      </div>
+
+      <div id="music-player">
+        <h3>Study Sounds</h3>
+        <button data-sound="bell.mp3">Bell</button>
+        <button data-sound="beep.mp3">Beep</button>
+        <button data-sound="chime.mp3">Chime</button>
+        <audio id="audio-player"></audio>
+      </div>
+
+      <div id="progress-chart">
+        <h3>Focus Progress</h3>
+        <canvas id="chart"></canvas>
+      </div>
+
+      <div id="mood-tracker">
+        <h3>How do you feel?</h3>
+        <button data-mood="😊 Happy">😊 Happy</button>
+        <button data-mood="😐 Neutral">😐 Neutral</button>
+        <button data-mood="😴 Tired">😴 Tired</button>
+        <button data-mood="🔥 Motivated">🔥 Motivated</button>
+      </div>
+
+      <div id="quote-display">
+        <h3>Motivational Quote</h3>
+        <p id="quote">"Stay focused, stay humble."</p>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section id="settings" class="section">
+      <h2>⚙️ Settings</h2>
+      <div class="settings-grid">
+        <div class="setting-card">
+          <h3>🖋️ Display</h3>
+          <label>Font Size:
+            <select onchange="changeFontSize(this.value)">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </label>
+          <label class="toggle">
+            <span>Compact Mode</span>
+            <input type="checkbox" onchange="toggleCompact(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-card">
+          <h3>📘 Tasks</h3>
+          <label>Sort Tasks:
+            <select onchange="changeSort(this.value)">
+              <option value="added">Added Order</option>
+              <option value="deadline">Deadline</option>
+              <option value="priority">Priority</option>
+            </select>
+          </label>
+          <label class="toggle">
+            <span>Show Deadlines</span>
+            <input type="checkbox" checked onchange="toggleDeadline(this.checked)">
+            <span class="slider"></span>
+          </label>
+          <label class="toggle">
+            <span>Show Priorities</span>
+            <input type="checkbox" checked onchange="togglePriority(this.checked)">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-card">
+          <h3>🎯 Focus Timer</h3>
+          <label>Session Length:
+            <select onchange="setTimerLength(this.value)">
+              <option value="1500" selected>25 min</option>
+              <option value="1800">30 min</option>
+              <option value="3600">60 min</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="setting-card danger">
+          <h3>⚠️ Reset</h3>
+          <button onclick="resetTasks()">Reset All Tasks</button>
+          <button onclick="resetStats()">Reset Stats</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>
